@@ -24,6 +24,9 @@ contract CryptoSuits is ERC721 {
     // This variable represents the admin of the smart contract
     address public adminAddress;
 
+    // Base URI of the server
+    string public baseURI;
+
     // Status of the sale
     bool public saleStatus;
 
@@ -117,9 +120,21 @@ contract CryptoSuits is ERC721 {
         adminAddress = newAdmin;
     }
 
+    // Set the base URI
+    function setBaseUri(string memory newBaseURI) public onlyAdmin {
+        baseURI = newBaseURI;
+    }
+
     // Update the status of the sale and emit an event
     function setSaleStatus(bool newSaleStatus) public onlyAdmin {
         saleStatus = newSaleStatus;
         emit SaleStatusChanged(newSaleStatus);
+    }
+
+
+    /* Override */
+    // Override the baseURI of the server
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
     }
 }
