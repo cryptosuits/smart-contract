@@ -25,7 +25,7 @@ contract CryptoSuits is ERC721, Ownable {
 
     /* VARIABLES */
     // Status of the sale (if paused, the sale has not started yet)
-    bool public paused = false;
+    bool public paused = true;
 
     // Base URI of the backend server
     string public baseURI = 'https://cryptosuit-api.herokuapp.com/json/';
@@ -35,7 +35,7 @@ contract CryptoSuits is ERC721, Ownable {
 
 
     /* EVENTS */
-    event UpdateSaleStatus(bool saleStatus);
+    event SaleStarted(bool started);
     event Withdraw(uint256 amount);
     event Mint(address minterAddress, address buyerAddress, uint256 tokenId);
     event GiveAway(address minterAddress, address winnerAddress, uint256 tokenId);
@@ -124,18 +124,22 @@ contract CryptoSuits is ERC721, Ownable {
         return paused;
     }
 
-    // Get the ID of the next CryptoSuit token to be minted
-    // It represents the number of token minted so far if you add 1 to it
-    function getNextTokenIDToBeMinted() public view returns (uint256) {
+    // Get the base URI
+    function getBaseURI() public view returns (string memory) {
+        return baseURI;
+    }
+
+    // Get the number of token minted so far
+    function getNumberofMintedTokens() public view returns (uint256) {
         return _tokenIds.current();
     }
 
 
-    /* Setters */
+    /* SETTERS */
     // Update the status of the sale and emit an event
     function setSaleStatus(bool newSaleStatus) public onlyOwner {
         paused = newSaleStatus;
-        emit UpdateSaleStatus(newSaleStatus);
+        emit SaleStarted(!newSaleStatus);
     }
 
     // Set the base URI
