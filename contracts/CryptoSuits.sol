@@ -14,13 +14,13 @@ contract CryptoSuits is ERC721, Ownable {
 
     /* CONSTANTS */
     // Price of a CryptoSuit NFT
-    uint256 public constant PRICE = 0.033 ether;
+    uint256 public price = 0.033 ether;
 
     // Number of NFT available to mint
-    uint256 public constant MAX_SUPPLY = 10000;
+    uint256 public totalSupply = 10000;
 
     // Maximum purchase of NFT in one transaction
-    uint256 public constant MAX_PURCHASE = 20;
+    uint256 public maxPurchase = 20;
 
 
     /* VARIABLES */
@@ -36,7 +36,7 @@ contract CryptoSuits is ERC721, Ownable {
 
     /* EVENTS */
     event SaleStarted(bool started);
-    event Withdraw(uint256 amount);
+    event Withdraw(address from, address to, uint256 amount);
     event Mint(address minterAddress, address buyerAddress, uint256 tokenId);
     event GiveAway(address minterAddress, address winnerAddress, uint256 tokenId);
 
@@ -51,15 +51,18 @@ contract CryptoSuits is ERC721, Ownable {
         // Check that the sale has started
         require(!paused, "The sale has not started yet");
 
-        // Check that the 0 < quantity <= MAX_PURCHASE
+        // Check that the buyerAddress is not 0x0
+        require(buyerAddress != address(0), "You can't mint to the zero address");
+
+        // Check that the 0 < quantity <= maxPurchase
         require(quantity > 0, "You need to buy at least 1 CryptoSuit NFT");
-        require(quantity <= MAX_PURCHASE, "You can't buy that much tokens in a transaction (maximum is 20)");
+        require(quantity <= maxPurchase, "You can't buy that much tokens in a transaction (maximum is 20)");
         
         // Check that there are enough NFT left to mint
-        require(_tokenIds.current().add(quantity) <= MAX_SUPPLY, "Exceending maximum supply");
+        require(_tokenIds.current().add(quantity) <= totalSupply, "Exceending maximum supply");
 
         // Check that the price is correct
-        require(PRICE.mul(quantity) <= msg.value, "Wrong price, don't fuck around!");
+        require(price.mul(quantity) <= msg.value, "Wrong price, don't fuck around!");
         
         // Mint some NFTs
         for (uint256 i = 0; i < quantity; i++) {
@@ -72,7 +75,10 @@ contract CryptoSuits is ERC721, Ownable {
     // Give some CryptoSuit NFTs
     function giveaway(address winnerAddress, uint256 quantity) external onlyOwner {
         // Check that there are enough NFT left to mint
-        require(_tokenIds.current().add(quantity) <= MAX_SUPPLY, "Exceending maximum supply");
+        require(_tokenIds.current().add(quantity) <= totalSupply, "Exceending maximum supply");
+
+        // Check that the winnerAddress is not 0x0
+        require(winnerAddress != address(0), "You can't giveaway to the zero address");
 
         // Check that the quantity is a positive number
         require(quantity > 0, "You need to specify a positive quantity");
@@ -107,13 +113,15 @@ contract CryptoSuits is ERC721, Ownable {
     }
 
     // Find the tokens owned by the connected address
-    function getMyAssets() external view returns(uint256[] memory) {
+    function getMyAssets() public view returns(uint256[] memory) {
         return getAssetsByOwner(tx.origin);
     }
 
     // Withdraw the money from the smart contract
     function withdraw() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+        uint256 amount = address(this).balance;
+        payable(msg.sender).transfer(amount);
+        emit Withdraw(address(this), msg.sender, amount);
     }
 
 
@@ -137,14 +145,29 @@ contract CryptoSuits is ERC721, Ownable {
 
     /* SETTERS */
     // Update the status of the sale and emit an event
-    function setSaleStatus(bool newSaleStatus) public onlyOwner {
+    function setSaleStatus(bool newSaleStatus) external onlyOwner {
         paused = newSaleStatus;
         emit SaleStarted(!newSaleStatus);
     }
 
     // Set the base URI
-    function setBaseUri(string memory newBaseURI) public onlyOwner {
+    function setBaseUri(string memory newBaseURI) external onlyOwner {
         baseURI = newBaseURI;
+    }
+
+    // Set the price
+    function setPrice(uint256 newPrice) external onlyOwner {
+        price = newPrice;
+    }
+
+    // Set the total supply
+    function setTotalSupply(uint256 newSupply) external onlyOwner {
+        totalSupply = newSupply;
+    }
+
+    // Set the maximum purchase
+    function setMaxPurchase(uint256 newMaxPurchase) external onlyOwner {
+        maxPurchase = newMaxPurchase;
     }
 
 
