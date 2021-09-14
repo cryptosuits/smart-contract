@@ -1,8 +1,5 @@
 # Dependency directory
 node_modules/
 
-# Smart contract build
-build/
-
 # Mnemonic phrase
 .secret
