@@ -35,7 +35,7 @@ contract CryptoSuits is ERC721, Ownable {
 
 
     /* EVENTS */
-    event SaleStarted(bool started);
+    event SaleStatusUpdated(bool paused);
     event Withdraw(address from, address to, uint256 amount);
     event Mint(address minterAddress, address buyerAddress, uint256 tokenId);
     event GiveAway(address minterAddress, address winnerAddress, uint256 tokenId);
@@ -145,9 +145,9 @@ contract CryptoSuits is ERC721, Ownable {
 
     /* SETTERS */
     // Update the status of the sale and emit an event
-    function setSaleStatus(bool newSaleStatus) external onlyOwner {
+    function updateSaleStatus(bool newSaleStatus) external onlyOwner {
         paused = newSaleStatus;
-        emit SaleStarted(!newSaleStatus);
+        emit SaleStatusUpdated(newSaleStatus);
     }
 
     // Set the base URI
