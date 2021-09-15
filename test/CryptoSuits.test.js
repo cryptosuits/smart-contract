@@ -1,7 +1,5 @@
 const { expect } = require('chai');
 const { BN, expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
-const constants = require('@openzeppelin/test-helpers/src/constants');
-const { zeroAddress } = require('ethereumjs-util');
 
 const CryptoSuits = artifacts.require("CryptoSuits");
 
@@ -23,16 +21,16 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
   });
 
   it("should start the sale", async () => {
-    const startSale = await contract.setSaleStatus(false);
+    const startSale = await contract.updateSaleStatus(false);
 
     const paused = await contract.getSaleStatus();
     expect(paused).to.be.false;
-    expectEvent(startSale, 'SaleStarted', { 'started': true });
+    expectEvent(startSale, 'SaleStatusUpdated', { 'paused': false });
   });
 
-  it('should fail to call the function setSaleStatus() because it is not called by the owner', async () => {
+  it('should fail to call the function updateSaleStatus() because it is not called by the owner', async () => {
     await expectRevert(
-      contract.setSaleStatus(false, { from: buyer}),
+      contract.updateSaleStatus(false, { from: buyer}),
       'Ownable: caller is not the owner -- Reason given: Ownable: caller is not the owner.',
     );
   });
@@ -67,7 +65,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
     
     await contract.setPrice(new BN(newPrice.toString()));
     
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
 
     await contract.mint(buyer, 1, { value: newPrice });
 
@@ -91,7 +89,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
     const newTotalSupply = 10;
     await contract.setTotalSupply(newTotalSupply);
     
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
 
     await expectRevert(
       contract.mint(buyer, 11, { value: 11 * 0.033 * 10e17 }),
@@ -112,7 +110,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
     const newMaxPurchase = 5;
     await contract.setMaxPurchase(newMaxPurchase);
     
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
 
     await expectRevert(
       contract.mint(buyer, 6, { value: 6 * 0.033 * 10e17 }),
@@ -137,7 +135,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
 
   /* Test the mint function */
   it('should mint some CryptoSuit NFTs', async () => {
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
 
     const quantity = 2;
 
@@ -168,7 +166,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
   });
 
   it('should fail when minting a CryptoSuit because the quantity is negative', async () => {
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
     
     await expectRevert(
       contract.mint(buyer, -1, { value: 0.033 * 10e17 }),
@@ -177,7 +175,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
   });
 
   it('should fail when minting a CryptoSuit because the quantity is superior to the max purchase', async () => {
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
     
     await expectRevert(
       contract.mint(buyer, 21, { value: 21 * 0.033 * 10e17 }),
@@ -186,7 +184,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
   });
 
   it('should fail when minting a CryptoSuit because the price is not correct', async () => {
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
     
     await expectRevert(
       contract.mint(buyer, 1, { value: 100 }),
@@ -197,7 +195,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
 
   /* Test the giveaway function */
   it('should giveaway some CryptoSuit NFTs', async () => {
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
 
     const quantity = 2;
 
@@ -230,7 +228,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
 
   /* Test the withdraw function */
   it('should withdraw the money from the contract', async () => {
-    await contract.setSaleStatus(false);
+    await contract.updateSaleStatus(false);
 
     const quantity = 10;
     await contract.mint(buyer, quantity, { value: quantity * 0.033 * 10e17 });
