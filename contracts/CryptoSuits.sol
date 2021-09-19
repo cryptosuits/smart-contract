@@ -115,6 +115,11 @@ contract CryptoSuits is ERC721, Ownable {
         return tokens;
     }
 
+    // Find the tokens owned by the connected address
+    function getMyAssets() public view returns(uint256[] memory) {
+        return getAssetsByOwner(tx.origin);
+    }
+
     // Withdraw the money from the smart contract
     function withdraw() external onlyOwner {
         uint256 amount = address(this).balance;

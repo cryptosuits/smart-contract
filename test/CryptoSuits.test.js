@@ -86,7 +86,7 @@ contract('CryptoSuits', ([owner, buyer, winner]) => {
 
   /* Test the totalSupply setter */
   it('should update the total supply', async () => {
-    const newTotalSupply = 10;
+    const newTotalSupply = 160; // 150 are "reserved" for the giveaways
     await contract.setTotalSupply(newTotalSupply);
     
     await contract.updateSaleStatus(false);
