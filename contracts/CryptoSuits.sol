@@ -19,6 +19,9 @@ contract CryptoSuits is ERC721, Ownable {
     // Number of NFT available to mint
     uint256 public totalSupply = 10000;
 
+    // Number of NFT available to giveaway
+    uint256 public giveawaySupply = 150;
+
     // Maximum purchase of NFT in one transaction
     uint256 public maxPurchase = 20;
 
@@ -59,7 +62,7 @@ contract CryptoSuits is ERC721, Ownable {
         require(quantity <= maxPurchase, "You can't buy that much tokens in a transaction (maximum is 20)");
         
         // Check that there are enough NFT left to mint
-        require(_tokenIds.current().add(quantity) <= totalSupply, "Exceending maximum supply");
+        require(_tokenIds.current().add(quantity) <= (totalSupply - giveawaySupply), "Exceending maximum supply");
 
         // Check that the price is correct
         require(price.mul(quantity) <= msg.value, "Wrong price, don't fuck around!");
@@ -75,7 +78,7 @@ contract CryptoSuits is ERC721, Ownable {
     // Give some CryptoSuit NFTs
     function giveaway(address winnerAddress, uint256 quantity) external onlyOwner {
         // Check that there are enough NFT left to mint
-        require(_tokenIds.current().add(quantity) <= totalSupply, "Exceending maximum supply");
+        require(_tokenIds.current().add(quantity) <= totalSupply + giveawaySupply, "Exceending maximum supply");
 
         // Check that the winnerAddress is not 0x0
         require(winnerAddress != address(0), "You can't giveaway to the zero address");
@@ -110,11 +113,6 @@ contract CryptoSuits is ERC721, Ownable {
             }
         }
         return tokens;
-    }
-
-    // Find the tokens owned by the connected address
-    function getMyAssets() public view returns(uint256[] memory) {
-        return getAssetsByOwner(tx.origin);
     }
 
     // Withdraw the money from the smart contract
